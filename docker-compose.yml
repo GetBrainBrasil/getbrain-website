@@ -5,29 +5,28 @@ services:
     image: seuusuario/seuapp:latest
     environment:
       NODE_ENV: production
-    labels:
-      - "traefik.enable=true"
-
-      # Domínios do site
-      - "traefik.http.routers.getbrain.rule=Host(`getbrain.com.br`, `www.getbrain.com.br`)"
-      - "traefik.http.routers.getbrain.entrypoints=websecure"
-      - "traefik.http.routers.getbrain.tls.certresolver=letsencryptresolver"
-
-      # Porta interna do seu app (ajuste se não for 3000)
-      - "traefik.http.services.getbrain.loadbalancer.server.port=3000"
-
-      # (Opcional) www -> raiz
-      - "traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\\.(.*)"
-      - "traefik.http.middlewares.www2root.redirectregex.replacement=https://$$1"
-      - "traefik.http.routers.getbrain.middlewares=www2root@docker"
-
-      # Dizer ao Traefik por qual network ele acessa o container
-      - "traefik.docker.network=network_swarm_public"
-
     networks:
       - network_swarm_public
-
     deploy:
+      labels:
+        - "traefik.enable=true"
+
+        # Domínios
+        - "traefik.http.routers.getbrain.rule=Host(`getbrain.com.br`, `www.getbrain.com.br`)"
+        - "traefik.http.routers.getbrain.entrypoints=websecure"
+        - "traefik.http.routers.getbrain.tls.certresolver=letsencryptresolver"
+
+        # Porta interna do app (ajuste se não for 3000)
+        - "traefik.http.services.getbrain.loadbalancer.server.port=3000"
+
+        # (Opcional) www -> raiz (note o $$1)
+        - "traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\\.(.*)"
+        - "traefik.http.middlewares.www2root.redirectregex.replacement=https://$$1"
+        - "traefik.http.routers.getbrain.middlewares=www2root@docker"
+
+        # Network que o Traefik usará para alcançar o serviço
+        - "traefik.docker.network=network_swarm_public"
+
       restart_policy:
         condition: on-failure
 
