@@ -1,11 +1,36 @@
 version: "3.9"
+
 services:
   web:
     image: seuusuario/seuapp:latest
-    ports:
-      - "3000:3000"
     environment:
       NODE_ENV: production
+    labels:
+      - traefik.enable=true
+
+      # Regra de roteamento para o domínio
+      - traefik.http.routers.getbrain.rule=Host(`getbrain.com.br`, `www.getbrain.com.br`)
+      - traefik.http.routers.getbrain.entrypoints=websecure
+      - traefik.http.routers.getbrain.tls.certresolver=letsencryptresolver
+
+      # Porta interna do app (seu container escuta em 3000)
+      - traefik.http.services.getbrain.loadbalancer.server.port=3000
+
+      # Middleware para redirecionar www -> sem www (opcional)
+      - traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\.(.*)
+      - traefik.http.middlewares.www2root.redirectregex.replacement=https://$1
+      - traefik.http.routers.getbrain.middlewares=www2root@docker
+
+      # Diz ao Traefik em qual rede o container está
+      - traefik.docker.network=network_swarm_public
+
+    networks:
+      - network_swarm_public
+
     deploy:
       restart_policy:
         condition: on-failure
+
+networks:
+  network_swarm_public:
+    external: true
