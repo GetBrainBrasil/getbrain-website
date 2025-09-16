@@ -8,7 +8,7 @@ services:
     labels:
       - "traefik.enable=true"
 
-      # Domínios
+      # Domínios do site
       - "traefik.http.routers.getbrain.rule=Host(`getbrain.com.br`, `www.getbrain.com.br`)"
       - "traefik.http.routers.getbrain.entrypoints=websecure"
       - "traefik.http.routers.getbrain.tls.certresolver=letsencryptresolver"
@@ -16,12 +16,12 @@ services:
       # Porta interna do seu app (ajuste se não for 3000)
       - "traefik.http.services.getbrain.loadbalancer.server.port=3000"
 
-      # (Opcional) www -> raiz (escape do $!)
+      # (Opcional) www -> raiz
       - "traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\\.(.*)"
       - "traefik.http.middlewares.www2root.redirectregex.replacement=https://$$1"
       - "traefik.http.routers.getbrain.middlewares=www2root@docker"
 
-      # Network que o Traefik deve usar para alcançar o container
+      # Dizer ao Traefik por qual network ele acessa o container
       - "traefik.docker.network=network_swarm_public"
 
     networks:
