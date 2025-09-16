@@ -17,8 +17,8 @@ services:
       - traefik.http.services.getbrain.loadbalancer.server.port=3000
 
       # Middleware para redirecionar www -> sem www (opcional)
-      - traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\.(.*)
-      - traefik.http.middlewares.www2root.redirectregex.replacement=https://$1
+      - traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\\.(.*)
+      - traefik.http.middlewares.www2root.redirectregex.replacement=https://$$1
       - traefik.http.routers.getbrain.middlewares=www2root@docker
 
       # Diz ao Traefik em qual rede o container está
