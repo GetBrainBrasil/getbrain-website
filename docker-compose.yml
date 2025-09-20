@@ -1,30 +1,27 @@
 version: "3.9"
 
 services:
-    web:
-   image: nginx:alpine
+  web:
+    build: .  # Vai buildar usando o Dockerfile
+    environment:
+      - NODE_ENV=production
     networks:
       - network_swarm_public
     deploy:
       labels:
         - "traefik.enable=true"
-
         # Domínios
         - "traefik.http.routers.getbrain.rule=Host(`getbrain.com.br`, `www.getbrain.com.br`)"
         - "traefik.http.routers.getbrain.entrypoints=websecure"
         - "traefik.http.routers.getbrain.tls.certresolver=letsencryptresolver"
-
-        # Porta interna do app (ajuste se não for 3000)
+        # Porta do Next.js
         - "traefik.http.services.getbrain.loadbalancer.server.port=3000"
-
-        # (Opcional) www -> raiz (note o $$1)
+        # Redirect www -> raiz
         - "traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\\.(.*)"
         - "traefik.http.middlewares.www2root.redirectregex.replacement=https://$$1"
         - "traefik.http.routers.getbrain.middlewares=www2root@docker"
-
-        # Network que o Traefik usará para alcançar o serviço
+        # Network para o Traefik
         - "traefik.docker.network=network_swarm_public"
-
       restart_policy:
         condition: on-failure
 
