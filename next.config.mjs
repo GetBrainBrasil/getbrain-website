@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-};
-export default nextConfig;
+  // Adicione outras configurações que você precisa
+}
+
+module.exports = nextConfig
