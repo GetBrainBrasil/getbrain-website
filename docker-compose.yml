@@ -1,10 +1,8 @@
 version: "3.9"
 
 services:
-  web:
-    image: seuusuario/seuapp:latest
-    environment:
-      NODE_ENV: production
+    web:
+    build:
     networks:
       - network_swarm_public
     deploy:
