@@ -1,6 +1,20 @@
-.git
-.next
+# Node/Next
 node_modules
+.next/cache
+.next/static/chunks/*.map
+out
 npm-debug.log*
-yarn.lock
-*.log
+pnpm-debug.log*
+
+# Vários
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+stack.yml
+*.local
+.env.local
+.env.development
+.env.test
+.env.production
