@@ -2,9 +2,7 @@ version: "3.9"
 
 services:
   getbrain:
-    image: SEUUSUARIO/IMAGEM:TAG   # ex: seuusuario/getbrain:latest
-    env_file:
-      - .env                        # opcional; remova se não usar
+    image: SEUUSUARIO/IMAGEM:TAG   # ex: seuusuario/getbrain-site:latest
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -17,12 +15,12 @@ services:
       labels:
         - "traefik.enable=true"
 
-        # HTTP (80) -> redireciona para HTTPS (443)
+        # HTTP (80) -> redireciona para HTTPS
         - "traefik.http.routers.getbrain-web.rule=Host(`getbrain.com.br`,`www.getbrain.com.br`)"
         - "traefik.http.routers.getbrain-web.entrypoints=web"
         - "traefik.http.routers.getbrain-web.middlewares=force-https@docker,www2root@docker"
 
-        # HTTPS
+        # HTTPS (443)
         - "traefik.http.routers.getbrain-https.rule=Host(`getbrain.com.br`,`www.getbrain.com.br`)"
         - "traefik.http.routers.getbrain-https.entrypoints=websecure"
         - "traefik.http.routers.getbrain-https.tls=true"
@@ -37,7 +35,7 @@ services:
         - "traefik.http.middlewares.www2root.redirectregex.replacement=https://$$1"
         - "traefik.http.middlewares.www2root.redirectregex.permanent=true"
 
-        # Cabeçalhos de segurança + rate limit
+        # Segurança + rate limit
         - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
         - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
         - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
