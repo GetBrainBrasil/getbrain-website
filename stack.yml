@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   getbrain:
-    image: SEUUSUARIO/IMAGEM:TAG   # ex: seuusuario/getbrain-site:latest
+    image: ghcr.io/GetBrainBrasil/getbrain-website:latest   # ex: seuusuario/getbrain-site:latest
     environment:
       - NODE_ENV=production
       - PORT=3000
