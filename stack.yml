@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  getbrain:
+    image: SEUUSUARIO/IMAGEM:TAG   # ex: seuusuario/getbrain:latest
+    env_file:
+      - .env                        # opcional; remova se não usar
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    networks:
+      - network_swarm_public
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+
+        # HTTP (80) -> redireciona para HTTPS (443)
+        - "traefik.http.routers.getbrain-web.rule=Host(`getbrain.com.br`,`www.getbrain.com.br`)"
+        - "traefik.http.routers.getbrain-web.entrypoints=web"
+        - "traefik.http.routers.getbrain-web.middlewares=force-https@docker,www2root@docker"
+
+        # HTTPS
+        - "traefik.http.routers.getbrain-https.rule=Host(`getbrain.com.br`,`www.getbrain.com.br`)"
+        - "traefik.http.routers.getbrain-https.entrypoints=websecure"
+        - "traefik.http.routers.getbrain-https.tls=true"
+        - "traefik.http.routers.getbrain-https.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.getbrain.loadbalancer.server.port=3000"
+
+        # Middlewares
+        - "traefik.http.middlewares.force-https.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.force-https.redirectscheme.permanent=true"
+
+        - "traefik.http.middlewares.www2root.redirectregex.regex=^https?://www\\.(.*)"
+        - "traefik.http.middlewares.www2root.redirectregex.replacement=https://$$1"
+        - "traefik.http.middlewares.www2root.redirectregex.permanent=true"
+
+        # Cabeçalhos de segurança + rate limit
+        - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
+        - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
+        - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
+        - "traefik.http.middlewares.security-headers.headers.frameDeny=true"
+        - "traefik.http.middlewares.security-headers.headers.browserXssFilter=true"
+        - "traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true"
+        - "traefik.http.middlewares.security-headers.headers.referrerPolicy=no-referrer-when-downgrade"
+        - "traefik.http.middlewares.rate-limit.ratelimit.average=100"
+        - "traefik.http.middlewares.rate-limit.ratelimit.burst=200"
+        - "traefik.http.middlewares.rate-limit.ratelimit.period=1s"
+
+        - "traefik.http.routers.getbrain-https.middlewares=security-headers@docker,rate-limit@docker,www2root@docker"
+
+        - "traefik.docker.network=network_swarm_public"
+
+networks:
+  network_swarm_public:
+    external: true
