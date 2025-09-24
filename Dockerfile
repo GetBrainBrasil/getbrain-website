@@ -2,14 +2,14 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Reprodutibilidade do pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# pnpm determinístico
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
-# Copia apenas o necessário para resolver dependências
+# deps (use só pnpm-lock + package.json)
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# Copia o restante e builda
+# código + build
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm run build
@@ -18,14 +18,14 @@ RUN pnpm run build
 FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Compatibilidade (alguns binários nativos precisam)
+# compat nativa
 RUN apk add --no-cache libc6-compat
 
-# Usuário não-root
+# usuário não-root
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nextjs
 
-# Copia artefatos do build standalone
+# artefatos do standalone
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
@@ -37,4 +37,4 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node","server.js"]
