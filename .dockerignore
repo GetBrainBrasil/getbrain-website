@@ -1,20 +1,13 @@
-# Node/Next
 node_modules
 .next/cache
 .next/static/chunks/*.map
 out
-npm-debug.log*
-pnpm-debug.log*
-
-# Vários
 .git
 .gitignore
 Dockerfile
-docker-compose.yml
-docker-compose.yaml
-stack.yml
+docker-compose*.yml
+stack*.yml
+.env*
 *.local
-.env.local
-.env.development
-.env.test
-.env.production
+pnpm-debug.log*
+npm-debug.log*
