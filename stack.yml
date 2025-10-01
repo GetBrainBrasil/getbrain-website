@@ -2,14 +2,11 @@ version: "3.9"
 
 services:
   getbrain:
-    image: ghcr.io/getbrainbrasil/getbrain-website:latest   # <= sua imagem aqui
+    image: ghcr.io/getbrainbrasil/getbrain-website:latest  # ajuste se usar outro registry
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOSTNAME=0.0.0.0
-    # PUBLICAR porta p/ testar DIRETO, sem Traefik
-    ports:
-      - "3001:3000"
     networks:
       - network_swarm_public
     deploy:
@@ -19,17 +16,24 @@ services:
       labels:
         - "traefik.enable=true"
 
-        # Router pega QUALQUER host temporariamente (inclusive IP)
-        - "traefik.http.routers.gb-any.rule=HostRegexp(`{host:.+}`)"
-        - "traefik.http.routers.gb-any.entrypoints=web"
-        - "traefik.http.routers.gb-any.service=gb-svc"
+        # HTTP -> HTTPS redirect
+        - "traefik.http.routers.gb-redirect.rule=Host(`getbrain.com.br`,`www.getbrain.com.br`)"
+        - "traefik.http.routers.gb-redirect.entrypoints=web"
+        - "traefik.http.middlewares.gb-https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.gb-redirect.middlewares=gb-https-redirect@docker"
 
-        - "traefik.http.routers.gb-any-https.rule=HostRegexp(`{host:.+}`)"
-        - "traefik.http.routers.gb-any-https.entrypoints=websecure"
-        - "traefik.http.routers.gb-any-https.tls=true"
-        - "traefik.http.routers.gb-any-https.tls.certresolver=letsencryptresolver"
-        - "traefik.http.routers.gb-any-https.service=gb-svc"
+        # Non-www -> www (ou ao contrário: escolha um)
+        - "traefik.http.middlewares.gb-www.redirectregex.regex=^https?://www\\.(.*)"
+        - "traefik.http.middlewares.gb-www.redirectregex.replacement=https://$${1}"
+        - "traefik.http.routers.gb-https.middlewares=gb-www@docker"
 
+        # HTTPS router
+        - "traefik.http.routers.gb-https.rule=Host(`getbrain.com.br`,`www.getbrain.com.br`)"
+        - "traefik.http.routers.gb-https.entrypoints=websecure"
+        - "traefik.http.routers.gb-https.tls=true"
+        - "traefik.http.routers.gb-https.tls.certresolver=letsencryptresolver"
+
+        # Service
         - "traefik.http.services.gb-svc.loadbalancer.server.port=3000"
         - "traefik.docker.network=network_swarm_public"
 
